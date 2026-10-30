@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iPhone Alternate Universe</title>
+
+  <!-- iOS Kit CSS Style -->
+  <link rel="stylesheet" href="https://aiuxplayground.com/kits/ios-26/v1/ios.css">
+
+  <style>
+    :root {
+      /* Wallpaper Lockscreen & Homescreen */
+      --lockscreen-bg: url("https://i.pinimg.com/736x/01/20/86/0120863f18a3b459bf8064fbc984c945.jpg");
+      --homescreen-bg: url("https://i.pinimg.com/736x/01/20/86/0120863f18a3b459bf8064fbc984c945.jpg");
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Container Utama iPhone */
+    .ios-surface {
+      width: 402px;
+      height: 874px;
+      border-radius: 54px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7),
+                  0 0 0 12px #334155,
+                  0 0 0 14px #0f172a;
+      background-color: #000000;
+    }
+
+    /* ----------------------------------
+       1. LOCK SCREEN LAYER
+    ----------------------------------- */
+    .lockscreen-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%),
+                  var(--lockscreen-bg) center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease;
+    }
+
+    .ios-surface.show-pin .lockscreen-layer {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .ios-surface.unlocked .lockscreen-layer {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .lockscreen-header {
+      padding-top: 80px;
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
+      user-select: none;
+    }
+
+    .lockscreen-date {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+      opacity: 0.95;
+    }
+
+    .lockscreen-time {
+      font-size: 96px;
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -3px;
+      margin-top: 4px;
+    }
+
+    .lockscreen-footer {
+      margin-top: auto;
+      padding: 0 16px 110px 16px;
+      width: 100%;
+      max-height: 480px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .ios-notification-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .ios-notification {
+      padding: 12px 14px !important;
+      align-items: center !important;
+    }
+
+    .ios-notification__icon {
+      margin-right: 12px !important;
+      flex-shrink: 0;
+    }
+
+    .lockscreen-footer::-webkit-scrollbar { display: none; }
+    .lockscreen-footer { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .lockscreen-action-btn {
+      width: 50px;
+      height: 50px;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      bottom: 28px;
+      z-index: 25;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .lockscreen-action-btn .ios-icon { font-size: 24px; }
+
+    .lockscreen-action-btn.active {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+
+    .lockscreen-action-btn.left { left: 20px; }
+    .lockscreen-action-btn.right { right: 20px; }
+
+    .lockscreen-bottom-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      z-index: 20;
+      width: 100%;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .swipe-text {
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      animation: pulse-glow 2s infinite ease-in-out;
+      user-select: none;
+    }
+
+    .custom-home-indicator {
+      width: 160px;
+      height: 5px;
+      background-color: #ffffff;
+      border-radius: 3px;
+      opacity: 0.85;
+      display: block;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 0.95; }
+    }
+
+    /* ----------------------------------
+       1.5 PASSCODE / PIN LAYER
+    ----------------------------------- */
+    .pin-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%),
+                  var(--lockscreen-bg) center/cover no-repeat;
+      backdrop-filter: blur(35px) brightness(0.8);
+      -webkit-backdrop-filter: blur(35px) brightness(0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 140px;
+      padding-bottom: 45px;
+      z-index: 8;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+      color: #ffffff;
+    }
+
+    .ios-surface.show-pin .pin-layer {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .ios-surface.unlocked .pin-layer {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-100%);
+    }
+
+    .pin-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .pin-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      letter-spacing: -0.2px;
+    }
+
+    .pin-dots {
+      display: flex;
+      gap: 18px;
+    }
+
+    .pin-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.8);
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .pin-dot.filled {
+      background-color: #ffffff;
+      border-color: #ffffff;
+    }
+
+    .pin-dots.error {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-12px); }
+      40%, 80% { transform: translateX(12px); }
+    }
+
+    .pin-keypad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px 26px;
+      width: 270px;
+      margin-top: 30px;
+      margin-bottom: auto;
+    }
+
+    .keypad-btn {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+      margin: 0 auto;
+    }
+
+    .keypad-btn:active {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(0.95);
+    }
+
+    .keypad-num {
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .keypad-letters {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      margin-top: 2px;
+      opacity: 0.7;
+    }
+
+    .pin-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 270px;
+      padding: 0 10px;
+    }
+
+    .pin-action-btn {
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* ----------------------------------
+       2. HOME SCREEN LAYER
+    ----------------------------------- */
+    .homescreen-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      width: 402px;
+      height: 874px;
+      background: var(--homescreen-bg) center/cover no-repeat;
+      padding-top: 65px;
+      padding-bottom: 0px;
+      z-index: 5;
+      opacity: 0;
+      transform: scale(0.92);
+      transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease;
+      overflow: hidden;
+    }
+
+    .ios-surface.unlocked .homescreen-layer {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px 12px;
+      padding: 10px 16px;
+    }
+
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+
+    .app-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(2px);
+      transition: transform 0.1s ease;
+      position: relative;
+    }
+
+    .app-item:active .app-icon {
+      transform: scale(0.9);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .app-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .app-name {
+      font-size: 11px;
+      color: #ffffff;
+      font-weight: 500;
+      text-align: center;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+      letter-spacing: -0.1px;
+    }
+
+    .badge {
+      position: absolute;
+      top: -2px;
+      right: 8px;
+      background-color: #ff3b30;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      z-index: 2;
+    }
+
+    .dock-container {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .search-pill {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 5px 16px;
+      border-radius: 20px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .dock-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 368px;
+      height: 96px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border-radius: 38px;
+      background-color: rgba(20, 20, 22, 0.85);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 18px;
+    }
+
+    .dock-bar .app-icon {
+      background: transparent;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* ----------------------------------
+       3. INTERACTIVE APP WINDOW LAYER
+    ----------------------------------- */
+    .app-window {
+      position: absolute;
+      inset: 0;
+      background: #0f172a;
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.85);
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      border-radius: 54px;
+      overflow: hidden;
+      padding-top: 60px;
+    }
+
+    .app-window.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    .app-window-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .app-window-title {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .app-window-body {
+      flex: 1;
+      padding: 24px 20px;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      text-align: center;
+    }
+
+    .app-window-body i {
+      font-size: 56px;
+      color: #38bdf8;
+    }
+
+    /* ----------------------------------
+       4. NOTES APP SPECIFIC STYLES
+    ----------------------------------- */
+    .notes-app {
+      position: absolute;
+      inset: 0;
+      background: #000000;
+      color: #ffffff;
+      z-index: 45;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.9);
+      transition: all 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+      border-radius: 54px;
+      overflow: hidden;
+      padding-top: 50px;
+    }
+
+    .notes-app.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Views inside Notes App */
+    .notes-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 50px;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: #000000;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .notes-view.hidden {
+      display: none;
+    }
+
+    /* Folders View Header */
+    .notes-header {
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notes-header-title {
+      font-size: 34px;
+      font-weight: 700;
+      padding: 0 20px 10px 20px;
+    }
+
+    .notes-section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      padding: 15px 20px 8px 20px;
+      letter-spacing: -0.3px;
+    }
+
+    .notes-list-group {
+      background: #1c1c1e;
+      border-radius: 12px;
+      margin: 0 16px 15px 16px;
+      overflow: hidden;
+    }
+
+    .notes-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .notes-item:last-child {
+      border-bottom: none;
+    }
+
+    .notes-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      color: #ffffff;
+    }
+
+    .notes-item-left i {
+      color: #e5b800;
+      font-size: 18px;
+    }
+
+    .notes-item-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #8e8e93;
+      font-size: 15px;
+    }
+
+    /* Detail / Inside Folder View */
+    .notes-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+    }
+
+    .notes-back-btn {
+      color: #007aff;
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .notes-empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #8e8e93;
+      text-align: center;
+    }
+
+    .notes-empty-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #8e8e93;
+      margin-bottom: 4px;
+    }
+
+    .notes-empty-sub {
+      font-size: 15px;
+      color: #636366;
+    }
+
+    .create-note-bottom-btn {
+      position: absolute;
+      bottom: 40px;
+      left: 20px;
+      right: 20px;
+      background: #007aff;
+      color: #ffffff;
+      border-radius: 25px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+    }
+
+    /* Editor View */
+    .note-editor {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .note-input-title {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 24px;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    .note-input-body {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #e5e5ea;
+      font-size: 16px;
+      line-height: 1.5;
+      width: 100%;
+      height: 350px;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .notes-scroll-container {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 80px;
+    }
+
+    /* ----------------------------------
+       5. CAMERA SCREEN LAYER
+    ----------------------------------- */
+    .camera-screen {
+      position: absolute;
+      inset: 0;
+      background: #000000;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 60px 20px 40px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .camera-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .camera-viewfinder {
+      flex: 1;
+      background: #111827;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      margin: 20px 0;
+    }
+
+    .camera-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    .shutter-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 4px solid #ffffff;
+      padding: 3px;
+      cursor: pointer;
+    }
+
+    .shutter-btn-inner {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ios-surface dark" id="iphoneSurface">
+    
+    <!-- Dynamic Island -->
+    <div class="ios-island" style="z-index: 50;"></div>
+
+    <!-- Status Bar iOS -->
+    <div class="ios-statusbar" style="color: #fff; z-index: 50;" id="statusbar">
+      <div class="ios-statusbar__row">
+        <span class="ios-statusbar__time">9:41</span>
+        <span class="ios-statusbar__island-gap"></span>
+        <span class="ios-statusbar__icons">
+          <i class="ios-icon ios-icon--cellular"></i>
+          <i class="ios-icon ios-icon--wifi"></i>
+          <span class="ios-battery" style="--level:100"><i></i></span>
+        </span>
+      </div>
+    </div>
+
+    <!-- 1. LOCK SCREEN LAYER -->
+    <div class="lockscreen-layer" id="lockscreenLayer">
+      <div class="lockscreen-header">
+        <div class="lockscreen-date">Rabu, 30 Oktober</div>
+        <div class="lockscreen-time">09:41</div>
+      </div>
+
+      <div class="lockscreen-footer">
+        <div class="ios-notification-list">
+          
+          <div class="ios-notification">
+            <span class="ios-notification__icon"><img src="Icon/messages-iOS-Dark.png" alt="Messages"></span>
+            <div class="ios-notification__body">
+              <div class="ios-notification__head">
+                <span class="ios-notification__title">Migel</span>
+                <span class="ios-notification__time">now</span>
+              </div>
+              <p class="ios-notification__text">Bapak Arka yang terhormat masa sih meeting batal karena suaminya kangen...</p>
+            </div>
+          </div>
+
+          <div class="ios-notification">
+            <span class="ios-notification__icon"><img src="Icon/messages-iOS-Dark.png" alt="Messages"></span>
+            <div class="ios-notification__body">
+              <div class="ios-notification__head">
+                <span class="ios-notification__title">Pipu Dede</span>
+                <span class="ios-notification__time">2m ago</span>
+              </div>
+              <p class="ios-notification__text">Papa boleh kah pulang Papa... Rere rindu Papa</p>
+            </div>
+          </div>
+
+          <div class="ios-notification">
+            <span class="ios-notification__icon"><img src="Icon/messages-iOS-Dark.png" alt="Messages"></span>
+            <div class="ios-notification__body">
+              <div class="ios-notification__head">
+                <span class="ios-notification__title">Dede</span>
+                <span class="ios-notification__time">5m ago</span>
+              </div>
+              <p class="ios-notification__text">PAPAAAA!</p>
+            </div>
+          </div>
+
+          <div class="ios-notification">
+            <span class="ios-notification__icon"><img src="Icon/reminders-iOS-Dark.png" alt="Reminders"></span>
+            <div class="ios-notification__body">
+              <div class="ios-notification__head">
+                <span class="ios-notification__title">Reminders</span>
+                <span class="ios-notification__time">10m ago</span>
+              </div>
+              <div class="ios-notification__subtitle">WORK</div>
+              <p class="ios-notification__text">Meeting Client : Kerjasama Wilayah Tn.XX</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="lockscreen-action-btn left" id="flashlightBtn">
+        <i class="ios-icon ios-icon--flashlight"></i>
+      </div>
+
+      <div class="lockscreen-action-btn right" id="cameraBtn">
+        <i class="ios-icon ios-icon--camera"></i>
+      </div>
+
+      <div class="lockscreen-bottom-bar" id="swipeUpBtn">
+        <span class="swipe-text">swipe up to unlock</span>
+        <div class="custom-home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 1.5 PASSCODE / PIN LAYER -->
+    <div class="pin-layer" id="pinLayer">
+      <div class="pin-header">
+        <div class="pin-title" id="pinTitle">Enter Passcode</div>
+        <div class="pin-dots" id="pinDots">
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+          <div class="pin-dot"></div>
+        </div>
+      </div>
+
+      <div class="pin-keypad">
+        <div class="keypad-btn" data-key="1"><span class="keypad-num">1</span><span class="keypad-letters">&nbsp;</span></div>
+        <div class="keypad-btn" data-key="2"><span class="keypad-num">2</span><span class="keypad-letters">ABC</span></div>
+        <div class="keypad-btn" data-key="3"><span class="keypad-num">3</span><span class="keypad-letters">DEF</span></div>
+        <div class="keypad-btn" data-key="4"><span class="keypad-num">4</span><span class="keypad-letters">GHI</span></div>
+        <div class="keypad-btn" data-key="5"><span class="keypad-num">5</span><span class="keypad-letters">JKL</span></div>
+        <div class="keypad-btn" data-key="6"><span class="keypad-num">6</span><span class="keypad-letters">MNO</span></div>
+        <div class="keypad-btn" data-key="7"><span class="keypad-num">7</span><span class="keypad-letters">PQRS</span></div>
+        <div class="keypad-btn" data-key="8"><span class="keypad-num">8</span><span class="keypad-letters">TUV</span></div>
+        <div class="keypad-btn" data-key="9"><span class="keypad-num">9</span><span class="keypad-letters">WXYZ</span></div>
+        <div class="keypad-btn" style="visibility: hidden;"></div>
+        <div class="keypad-btn" data-key="0"><span class="keypad-num">0</span><span class="keypad-letters">&nbsp;</span></div>
+        <div class="keypad-btn" style="visibility: hidden;"></div>
+      </div>
+
+      <div class="pin-actions">
+        <span class="pin-action-btn" id="emergencyPinBtn">Emergency</span>
+        <span class="pin-action-btn" id="cancelPinBtn">Cancel</span>
+      </div>
+    </div>
+
+    <!-- 2. HOME SCREEN LAYER -->
+    <div class="homescreen-layer" id="homescreenLayer">
+      
+      <div class="app-grid">
+        <div class="app-item" data-app="FaceTime">
+          <div class="app-icon"><img src="Icon/facetime-iOS-Dark.png" alt="FaceTime"></div>
+          <span class="app-name">FaceTime</span>
+        </div>
+        <div class="app-item" data-app="Calendar">
+          <div class="app-icon"><img src="Icon/calendar-iOS-Dark.png" alt="Calendar"></div>
+          <span class="app-name">Calendar</span>
+        </div>
+        <div class="app-item" data-app="Photos">
+          <div class="app-icon"><img src="Icon/photos-iOS-Dark.png" alt="Photos"></div>
+          <span class="app-name">Photos</span>
+        </div>
+        <div class="app-item" data-app="Camera">
+          <div class="app-icon"><img src="Icon/camera-iOS-Dark.png" alt="Camera"></div>
+          <span class="app-name">Camera</span>
+        </div>
+
+        <div class="app-item" data-app="Mail">
+          <div class="app-icon"><img src="Icon/mail-iOS-Dark.png" alt="Mail"></div>
+          <span class="app-name">Mail</span>
+        </div>
+        <div class="app-item" data-app="Notes">
+          <div class="app-icon"><img src="Icon/notes-iOS-Dark.png" alt="Notes"></div>
+          <span class="app-name">Notes</span>
+        </div>
+        <div class="app-item" data-app="Reminders">
+          <div class="app-icon"><img src="Icon/reminders-iOS-Dark.png" alt="Reminders"></div>
+          <span class="app-name">Reminders</span>
+        </div>
+        <div class="app-item" data-app="Clock">
+          <div class="app-icon"><img src="Icon/clock-iOS-Dark.png" alt="Clock"></div>
+          <span class="app-name">Clock</span>
+        </div>
+
+        <div class="app-item" data-app="News">
+          <div class="app-icon"><img src="Icon/news-iOS-Dark.png" alt="News"></div>
+          <span class="app-name">News</span>
+        </div>
+        <div class="app-item" data-app="Files">
+          <div class="app-icon"><img src="Icon/files-iOS-Dark.png" alt="Files"></div>
+          <span class="app-name">Files</span>
+        </div>
+        <div class="app-item" data-app="Find My">
+          <div class="app-icon"><img src="Icon/findmy-iOS-Dark.png" alt="Find My"></div>
+          <span class="app-name">Find My</span>
+        </div>
+        <div class="app-item" data-app="App Store">
+          <div class="app-icon"><img src="Icon/appstore-iOS-Dark.png" alt="App Store"></div>
+          <span class="app-name">App Store</span>
+        </div>
+
+        <div class="app-item" data-app="Maps">
+          <div class="app-icon">
+            <img src="Icon/maps-iOS-Dark.png" alt="Maps">
+            <span class="badge">1</span>
+          </div>
+          <span class="app-name">Maps</span>
+        </div>
+        <div class="app-item" data-app="Health">
+          <div class="app-icon"><img src="Icon/health-iOS-Dark.png" alt="Health"></div>
+          <span class="app-name">Health</span>
+        </div>
+        <div class="app-item" data-app="Calculator">
+          <div class="app-icon"><img src="Icon/calculator-iOS-Dark.png" alt="Calculator"></div>
+          <span class="app-name">Calculator</span>
+        </div>
+        <div class="app-item" data-app="Settings">
+          <div class="app-icon"><img src="Icon/settings-iOS-Dark.png" alt="Settings"></div>
+          <span class="app-name">Settings</span>
+        </div>
+
+        <div class="app-item" data-app="App Name">
+          <div class="app-icon"><img src="Icon/placeholder-iOS-Default.png" alt="App Name"></div>
+          <span class="app-name">App Name</span>
+        </div>
+      </div>
+
+      <div class="dock-container">
+        <div class="search-pill">
+          <i class="ios-icon ios-icon--search" style="font-size: 11px;"></i>
+          <span>Search</span>
+        </div>
+
+        <div class="dock-bar">
+          <div class="app-item" data-app="Phone">
+            <div class="app-icon"><img src="Icon/phone-iOS-Dark.png" alt="Phone"></div>
+          </div>
+          <div class="app-item" data-app="Safari">
+            <div class="app-icon"><img src="Icon/safari-iOS-Dark.png" alt="Safari"></div>
+          </div>
+          <div class="app-item" data-app="Messages">
+            <div class="app-icon"><img src="Icon/messages-iOS-Dark.png" alt="Messages"></div>
+          </div>
+          <div class="app-item" data-app="Music">
+            <div class="app-icon"><img src="Icon/music-iOS-Dark.png" alt="Music"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lockscreen-bottom-bar" id="lockPhoneBtn" style="pointer-events: auto; position: absolute; bottom: 8px;">
+        <div class="custom-home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 3. INTERACTIVE APP WINDOW LAYER (General) -->
+    <div class="app-window" id="appWindow">
+      <div class="app-window-header">
+        <i class="ios-icon ios-icon--chevron-left" id="closeAppBtn" style="font-size: 22px; cursor: pointer;"></i>
+        <span class="app-window-title" id="appWindowTitle">Aplikasi</span>
+        <i class="ios-icon ios-icon--ellipsis" style="font-size: 20px;"></i>
+      </div>
+      <div class="app-window-body">
+        <i class="ios-icon ios-icon--grid"></i>
+        <h3 id="appWindowHeading" style="color: #fff; font-weight: 600;">Halaman Aplikasi</h3>
+        <p>Ini adalah tampilan antarmuka Alternate Universe kamu.</p>
+      </div>
+
+      <div class="lockscreen-bottom-bar" id="closeAppHomeIndicator" style="pointer-events: auto; position: absolute; bottom: 8px;">
+        <div class="custom-home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 3.5 CUSTOM NOTES APP INTERFACE -->
+    <div class="notes-app" id="notesApp">
+      
+      <!-- VIEW 1: FOLDERS LIST -->
+      <div class="notes-view" id="notesFoldersView">
+        <div class="notes-header">
+          <span style="color:#007aff; font-size:17px;">Edit</span>
+        </div>
+        <div class="notes-header-title">Folders</div>
+
+        <div class="notes-scroll-container">
+          <!-- Custom Folders Section -->
+          <div class="notes-list-group">
+            <div class="notes-item open-folder-btn" data-folder="Rere's Things">
+              <div class="notes-item-left">
+                <i class="ios-icon ios-icon--folder"></i>
+                <span>Rere's Things</span>
+              </div>
+              <div class="notes-item-right">
+                <span class="folder-count">0</span>
+                <i class="ios-icon ios-icon--chevron-right"></i>
+              </div>
+            </div>
+            <div class="notes-item open-folder-btn" data-folder="Castle's Things">
+              <div class="notes-item-left">
+                <i class="ios-icon ios-icon--folder"></i>
+                <span>Castle's Things</span>
+              </div>
+              <div class="notes-item-right">
+                <span class="folder-count">0</span>
+                <i class="ios-icon ios-icon--chevron-right"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- iCloud Section -->
+          <div class="notes-section-title">iCloud</div>
+          <div class="notes-list-group">
+            <div class="notes-item open-folder-btn" data-folder="Quick Notes">
+              <div class="notes-item-left">
+                <i class="ios-icon ios-icon--note-text"></i>
+                <span>Quick Notes</span>
+              </div>
+              <div class="notes-item-right">
+                <span>0</span>
+                <i class="ios-icon ios-icon--chevron-right"></i>
+              </div>
+            </div>
+            <div class="notes-item open-folder-btn" data-folder="All iCloud">
+              <div class="notes-item-left">
+                <i class="ios-icon ios-icon--folder"></i>
+                <span>All iCloud</span>
+              </div>
+              <div class="notes-item-right">
+                <span id="allNotesCount">0</span>
+                <i class="ios-icon ios-icon--chevron-right"></i>
+              </div>
+            </div>
+            <div class="notes-item open-folder-btn" data-folder="Notes">
+              <div class="notes-item-left">
+                <i class="ios-icon ios-icon--folder"></i>
+                <span>Notes</span>
+              </div>
+              <div class="notes-item-right">
+                <span id="mainNotesCount">0</span>
+                <i class="ios-icon ios-icon--chevron-right"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: NOTES LIST INSIDE FOLDER (Match Screenshot) -->
+      <div class="notes-view hidden" id="notesDetailView">
+        <div class="notes-nav-bar">
+          <div class="notes-back-btn" id="backToFoldersBtn">
+            <i class="ios-icon ios-icon--chevron-left"></i>
+            <span>Folders</span>
+          </div>
+          <div style="color:#007aff; font-size:22px; cursor:pointer;" id="createNoteHeaderBtn">
+            <i class="ios-icon ios-icon--square-and-pencil"></i>
+          </div>
+        </div>
+
+        <div class="notes-header-title" id="currentFolderName">Notes</div>
+
+        <!-- LIST CATATAN ATAU EMPTY STATE -->
+        <div class="notes-scroll-container" style="display:flex; flex-direction:column;">
+          <div id="notesContainer" class="notes-list-group" style="margin-top:10px;"></div>
+
+          <div class="notes-empty-state" id="notesEmptyState">
+            <div class="notes-empty-title">No Notes</div>
+            <div class="notes-empty-sub">Start by adding a note.</div>
+          </div>
+        </div>
+
+        <div class="create-note-bottom-btn" id="createNoteBottomBtn">
+          Create Note
+        </div>
+      </div>
+
+      <!-- VIEW 3: WRITE / EDIT NOTE -->
+      <div class="notes-view hidden" id="notesEditorView">
+        <div class="notes-nav-bar">
+          <div class="notes-back-btn" id="backToNotesListBtn">
+            <i class="ios-icon ios-icon--chevron-left"></i>
+            <span id="editorBackLabel">Notes</span>
+          </div>
+          <div style="color:#007aff; font-weight:600; font-size:17px; cursor:pointer;" id="saveNoteBtn">
+            Done
+          </div>
+        </div>
+
+        <div class="note-editor">
+          <input type="text" class="note-input-title" id="noteTitleInput" placeholder="Title">
+          <textarea class="note-input-body" id="noteBodyInput" placeholder="Start typing..."></textarea>
+        </div>
+      </div>
+
+      <div class="lockscreen-bottom-bar" id="closeNotesHomeIndicator" style="pointer-events: auto; position: absolute; bottom: 8px;">
+        <div class="custom-home-indicator"></div>
+      </div>
+    </div>
+
+    <!-- 4. CAMERA SCREEN LAYER -->
+    <div class="camera-screen" id="cameraScreen">
+      <div style="display: flex; justify-content: space-between; align-items: center; color: white;">
+        <i class="ios-icon ios-icon--xmark" id="closeCameraBtn" style="font-size: 24px; cursor: pointer;"></i>
+        <span>Photo</span>
+        <i class="ios-icon ios-icon--gear" style="font-size: 20px;"></i>
+      </div>
+      <div class="camera-viewfinder">
+        <i class="ios-icon ios-icon--camera" style="font-size: 48px; opacity: 0.5;"></i>
+      </div>
+      <div class="camera-controls">
+        <div style="width: 40px; height: 40px; background: #334155; border-radius: 8px;"></div>
+        <div class="shutter-btn"><div class="shutter-btn-inner"></div></div>
+        <i class="ios-icon ios-icon--arrow-down-up" style="font-size: 24px; color: white;"></i>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const iphoneSurface = document.getElementById('iphoneSurface');
+    const swipeUpBtn = document.getElementById('swipeUpBtn');
+    const lockPhoneBtn = document.getElementById('lockPhoneBtn');
+    const flashlightBtn = document.getElementById('flashlightBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const cameraScreen = document.getElementById('cameraScreen');
+    const closeCameraBtn = document.getElementById('closeCameraBtn');
+
+    const appWindow = document.getElementById('appWindow');
+    const appWindowTitle = document.getElementById('appWindowTitle');
+    const appWindowHeading = document.getElementById('appWindowHeading');
+    const closeAppBtn = document.getElementById('closeAppBtn');
+    const closeAppHomeIndicator = document.getElementById('closeAppHomeIndicator');
+
+    // PASSCODE / PIN SYSTEM
+    const CORRECT_PIN = "1322";
+    let enteredPin = "";
+    const pinDotsContainer = document.getElementById('pinDots');
+    const pinDots = pinDotsContainer.querySelectorAll('.pin-dot');
+    const cancelPinBtn = document.getElementById('cancelPinBtn');
+    const emergencyPinBtn = document.getElementById('emergencyPinBtn');
+    const keypadBtns = document.querySelectorAll('.keypad-btn[data-key]');
+
+    function showPinScreen() {
+      iphoneSurface.classList.add('show-pin');
+      resetPin();
+    }
+
+    function hidePinScreen() {
+      iphoneSurface.classList.remove('show-pin');
+      resetPin();
+    }
+
+    function unlockPhone() {
+      iphoneSurface.classList.remove('show-pin');
+      iphoneSurface.classList.add('unlocked');
+    }
+
+    function lockPhone() {
+      iphoneSurface.classList.remove('unlocked');
+      iphoneSurface.classList.remove('show-pin');
+      resetPin();
+      closeApp();
+      closeNotesApp();
+    }
+
+    swipeUpBtn.addEventListener('click', showPinScreen);
+    cancelPinBtn.addEventListener('click', hidePinScreen);
+    lockPhoneBtn.addEventListener('click', lockPhone);
+
+    emergencyPinBtn.addEventListener('click', () => {
+      alert("Emergency Call Screen");
+    });
+
+    keypadBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (enteredPin.length < 4) {
+          enteredPin += btn.getAttribute('data-key');
+          updatePinDots();
+
+          if (enteredPin.length === 4) {
+            setTimeout(checkPin, 150);
+          }
+        }
+      });
+    });
+
+    function updatePinDots() {
+      pinDots.forEach((dot, index) => {
+        if (index < enteredPin.length) {
+          dot.classList.add('filled');
+        } else {
+          dot.classList.remove('filled');
+        }
+      });
+    }
+
+    function checkPin() {
+      if (enteredPin === CORRECT_PIN) {
+        unlockPhone();
+      } else {
+        pinDotsContainer.classList.add('error');
+        setTimeout(() => {
+          pinDotsContainer.classList.remove('error');
+          resetPin();
+        }, 400);
+      }
+    }
+
+    function resetPin() {
+      enteredPin = "";
+      updatePinDots();
+    }
+
+    let startY = 0;
+    const lockscreenLayer = document.getElementById('lockscreenLayer');
+
+    lockscreenLayer.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    });
+
+    lockscreenLayer.addEventListener('touchend', (e) => {
+      let endY = e.changedTouches[0].clientY;
+      if (startY - endY > 50) {
+        showPinScreen();
+      }
+    });
+
+    flashlightBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      flashlightBtn.classList.toggle('active');
+    });
+
+    cameraBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cameraScreen.classList.add('active');
+    });
+
+    closeCameraBtn.addEventListener('click', () => {
+      cameraScreen.classList.remove('active');
+    });
+
+    // ----------------------------------
+    // NOTES APPLICATION SYSTEM & LOGIC
+    // ----------------------------------
+    const notesApp = document.getElementById('notesApp');
+    const notesFoldersView = document.getElementById('notesFoldersView');
+    const notesDetailView = document.getElementById('notesDetailView');
+    const notesEditorView = document.getElementById('notesEditorView');
+
+    const currentFolderName = document.getElementById('currentFolderName');
+    const notesContainer = document.getElementById('notesContainer');
+    const notesEmptyState = document.getElementById('notesEmptyState');
+
+    const backToFoldersBtn = document.getElementById('backToFoldersBtn');
+    const backToNotesListBtn = document.getElementById('backToNotesListBtn');
+    const createNoteBottomBtn = document.getElementById('createNoteBottomBtn');
+    const createNoteHeaderBtn = document.getElementById('createNoteHeaderBtn');
+    const saveNoteBtn = document.getElementById('saveNoteBtn');
+    const closeNotesHomeIndicator = document.getElementById('closeNotesHomeIndicator');
+
+    const noteTitleInput = document.getElementById('noteTitleInput');
+    const noteBodyInput = document.getElementById('noteBodyInput');
+    const editorBackLabel = document.getElementById('editorBackLabel');
+
+    let notesData = {
+      "Rere's Things": [],
+      "Castle's Things": [],
+      "Quick Notes": [],
+      "All iCloud": [],
+      "Notes": []
+    };
+
+    let activeFolder = "Notes";
+
+    function openNotesApp() {
+      notesApp.classList.add('active');
+      showFoldersView();
+    }
+
+    function closeNotesApp() {
+      notesApp.classList.remove('active');
+    }
+
+    function showFoldersView() {
+      notesFoldersView.classList.remove('hidden');
+      notesDetailView.classList.add('hidden');
+      notesEditorView.classList.add('hidden');
+      updateFolderCounts();
+    }
+
+    function openFolder(folderName) {
+      activeFolder = folderName;
+      currentFolderName.textContent = folderName;
+      editorBackLabel.textContent = folderName;
+      
+      notesFoldersView.classList.add('hidden');
+      notesDetailView.classList.remove('hidden');
+      notesEditorView.classList.add('hidden');
+
+      renderNotesList();
+    }
+
+    function renderNotesList() {
+      const folderNotes = notesData[activeFolder] || [];
+      notesContainer.innerHTML = '';
+
+      if (folderNotes.length === 0) {
+        notesEmptyState.style.display = 'flex';
+        notesContainer.style.display = 'none';
+      } else {
+        notesEmptyState.style.display = 'none';
+        notesContainer.style.display = 'block';
+
+        folderNotes.forEach((note, index) => {
+          const noteEl = document.createElement('div');
+          noteEl.className = 'notes-item';
+          noteEl.innerHTML = `
+            <div class="notes-item-left" style="flex-direction:column; align-items:flex-start; gap:2px;">
+              <span style="font-weight:600; font-size:16px;">${note.title || 'Untitled'}</span>
+              <span style="font-size:13px; color:#8e8e93; max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${note.body || 'No additional text'}</span>
+            </div>
+            <div class="notes-item-right">
+              <i class="ios-icon ios-icon--chevron-right"></i>
+            </div>
+          `;
+          notesContainer.appendChild(noteEl);
+        });
+      }
+    }
+
+    function openNoteEditor() {
+      noteTitleInput.value = '';
+      noteBodyInput.value = '';
+      notesDetailView.classList.add('hidden');
+      notesEditorView.classList.remove('hidden');
+    }
+
+    function saveNote() {
+      const title = noteTitleInput.value.trim();
+      const body = noteBodyInput.value.trim();
+
+      if (title !== '' || body !== '') {
+        const newNote = {
+          title: title || 'Untitled',
+          body: body,
+          date: new Date().toLocaleDateString()
+        };
+
+        if (!notesData[activeFolder]) {
+          notesData[activeFolder] = [];
+        }
+        notesData[activeFolder].push(newNote);
+      }
+
+      notesEditorView.classList.add('hidden');
+      notesDetailView.classList.remove('hidden');
+      renderNotesList();
+      updateFolderCounts();
+    }
+
+    function updateFolderCounts() {
+      document.querySelectorAll('.open-folder-btn').forEach(btn => {
+        const name = btn.getAttribute('data-folder');
+        const countSpan = btn.querySelector('.notes-item-right span');
+        if (countSpan && notesData[name]) {
+          countSpan.textContent = notesData[name].length;
+        }
+      });
+    }
+
+    // Event Listeners Notes
+    document.querySelectorAll('.open-folder-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const folderName = btn.getAttribute('data-folder');
+        openFolder(folderName);
+      });
+    });
+
+    backToFoldersBtn.addEventListener('click', showFoldersView);
+    backToNotesListBtn.addEventListener('click', () => {
+      notesEditorView.classList.add('hidden');
+      notesDetailView.classList.remove('hidden');
+    });
+
+    createNoteBottomBtn.addEventListener('click', openNoteEditor);
+    createNoteHeaderBtn.addEventListener('click', openNoteEditor);
+    saveNoteBtn.addEventListener('click', saveNote);
+    closeNotesHomeIndicator.addEventListener('click', closeNotesApp);
+
+    // INTERAKTIVITAS MEMBUKA APLIKASI
+    const allApps = document.querySelectorAll('.app-item');
+
+    allApps.forEach(app => {
+      app.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const appName = app.getAttribute('data-app') || 'Aplikasi';
+        
+        if (appName === 'Camera') {
+          cameraScreen.classList.add('active');
+        } else if (appName === 'Notes') {
+          openNotesApp();
+        } else {
+          openApp(appName);
+        }
+      });
+    });
+
+    function openApp(name) {
+      appWindowTitle.textContent = name;
+      appWindowHeading.textContent = `Aplikasi ${name}`;
+      appWindow.classList.add('active');
+    }
+
+    function closeApp() {
+      appWindow.classList.remove('active');
+    }
+
+    closeAppBtn.addEventListener('click', closeApp);
+    closeAppHomeIndicator.addEventListener('click', closeApp);
+  </script>
+
+</body>
+</html>
